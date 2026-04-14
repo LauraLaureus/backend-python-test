@@ -2,6 +2,7 @@
 import model as m
 
 app = FastAPI(title="Notification Service (Technical Test)")
+# we don't have to do anything with the port since it's already config in the Dockerfile
 
 @app.post(
     path="/v1/requests",

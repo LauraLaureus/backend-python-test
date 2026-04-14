@@ -13,6 +13,11 @@ class RequestStatus(str, Enum):
     processing = "processing"
     sent = "sent"
     failed = "failed"
+
+class ProviderPriority(str,Enum):
+    low = "low"
+    normal = "normal"
+    high = "high"
 # endregion
 
 
