@@ -1,8 +1,18 @@
 ﻿from fastapi import FastAPI, Response, status
+from contextlib import asynccontextmanager
 import model as m
+import controller as c
+import db
 
-app = FastAPI(title="Notification Service (Technical Test)")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db.create_db_and_tables()
+    yield
+
+app = FastAPI(title="Notification Service (Technical Test)", lifespan=lifespan)
 # we don't have to do anything with the port since it's already config in the Dockerfile
+
+
 
 @app.post(
     path="/v1/requests",

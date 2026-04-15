@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
+from sqlmodel import SQLModel, Field
+from uuid import uuid4
 
 
 # region Enums
@@ -21,17 +23,31 @@ class ProviderPriority(str,Enum):
 # endregion
 
 
-# region DTOs
-class CreateRequestBody(BaseModel):
+# region SQLModel
+
+class NotificationBase(SQLModel):
     to: str
     message: str
     type: RequestType
 
+# endregion
 
-class CreateRequestResponse(BaseModel):
+# region Table definition
+
+class Notification(NotificationBase, table=True):
+    id : str =  Field(default_factory=lambda: str(uuid4()), primary_key=True)
+    status : RequestStatus
+
+# endregion
+
+# region DTOs
+class CreateRequestBody(NotificationBase):
+    pass
+
+class CreateRequestResponse(SQLModel):
     id: str
 
-class RequestStatusResponse(BaseModel):
+class RequestStatusResponse(SQLModel):
     id: str
     status: RequestStatus
 
