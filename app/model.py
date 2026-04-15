@@ -36,7 +36,7 @@ class NotificationBase(SQLModel):
 
 class Notification(NotificationBase, table=True):
     id : str =  Field(default_factory=lambda: str(uuid4()), primary_key=True)
-    status : RequestStatus
+    status : RequestStatus = "queued"
 
 # endregion
 
