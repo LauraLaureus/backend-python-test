@@ -32,6 +32,8 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 @app.post(
     path="/v1/requests",
+    summary="Create a notification request",
+    description="Returns the id of the notification.",
     response_model=m.CreateRequestResponse,
     status_code=status.HTTP_201_CREATED
 )
@@ -48,6 +50,8 @@ def create_request(payload: m.CreateRequestBody, session: Session = Depends(db.g
     responses={
         202: {"description": "Accepted"}
     },
+    summary="Start the notification process.",
+    description="Returns the 'Accepted' code if the provided notification id exists. Returns 404(Not found) otherwise."
 )
 def process_request(id:str,  background_tasks: BackgroundTasks, session: Session = Depends(db.get_session)):
     notification = session.get(m.Notification,id)
@@ -58,6 +62,7 @@ def process_request(id:str,  background_tasks: BackgroundTasks, session: Session
         )
     else:
 
+        # Do not trigger twice for the same notification or a finished one. 
         if notification.status in [m.RequestStatus.processing, m.RequestStatus.sent]:
             return {"detail": "Accepted"}
 
@@ -74,6 +79,8 @@ def process_request(id:str,  background_tasks: BackgroundTasks, session: Session
     path="/v1/requests/{id}",
     response_model=m.RequestStatusResponse,
     status_code=status.HTTP_200_OK,
+    summary="Get the current status of the notification",
+    description="Return the current status of the notification. It can be 'queued', 'processing', 'sent' or 'failure'."
 )
 def get_request_status(id:str, session: Session = Depends(db.get_session)):
     
