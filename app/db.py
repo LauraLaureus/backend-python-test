@@ -6,9 +6,9 @@ sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}
 engine = create_engine(sqlite_url, connect_args=connect_args,
-    pool_size=30,           # Máx 30 conexiones reales
-    max_overflow=100,       # +100 bajo demanda
-    pool_timeout=30,        # Espera 30s por pool
+    pool_size=50,           # Máx 50 conexiones reales
+    max_overflow=200,       # +200 bajo demanda
+    pool_timeout=45,        # Espera 45s por pool
     pool_pre_ping=True,     # Valida conexiones
     pool_recycle=3600,      # Recicla cada hora
     )
