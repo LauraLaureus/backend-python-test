@@ -9,6 +9,12 @@ import db
 # region App configuration
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Method for initialization and config at the App level
+
+    Args:
+        app: the FastAPI app
+    """
     db.create_db_and_tables()
     yield
 
@@ -18,6 +24,13 @@ app = FastAPI(title="Notification Service (Technical Test)", lifespan=lifespan)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    """
+    All unhandled exceptions should be gathered here
+
+    Args:
+        request: current request
+        exception: triggered exception
+    """
     return JSONResponse(
         status_code=500,
         content={
@@ -38,6 +51,15 @@ async def global_exception_handler(request: Request, exc: Exception):
     status_code=status.HTTP_201_CREATED
 )
 def create_request(payload: m.CreateRequestBody, session: Session = Depends(db.get_session)):
+    """
+    Create a notification request. 
+
+    Args: 
+        payload: A JSON or dict with the 'message','to','type' keys.
+
+    Returns:
+        201 CREATED with a id of the created request. 
+    """
     notification = m.Notification.model_validate(payload)
     session.add(notification)
     session.commit()
@@ -54,6 +76,15 @@ def create_request(payload: m.CreateRequestBody, session: Session = Depends(db.g
     description="Returns the 'Accepted' code if the provided notification id exists. Returns 404(Not found) otherwise."
 )
 def process_request(id:str,  background_tasks: BackgroundTasks, session: Session = Depends(db.get_session)):
+    """
+    Send the notification request for request with the provided id.
+
+    Args:
+        id: id of the request to be sent. 
+
+    Returns:
+        202 ACCEPTED code. 
+    """
     notification = session.get(m.Notification,id)
     if not notification:
         raise HTTPException(
@@ -83,7 +114,15 @@ def process_request(id:str,  background_tasks: BackgroundTasks, session: Session
     description="Return the current status of the notification. It can be 'queued', 'processing', 'sent' or 'failure'."
 )
 def get_request_status(id:str, session: Session = Depends(db.get_session)):
-    
+    """
+    Get the current status of a notification request. 
+
+    Args:
+        id: the id of the notification request. 
+
+    Returns:
+        A request status response with the id and the status
+    """
     notification = session.get(m.Notification,id)
     if not notification:
         raise HTTPException(
@@ -97,6 +136,13 @@ def get_request_status(id:str, session: Session = Depends(db.get_session)):
 # region private func
 
 def send_to_provider_and_update_status(id:str):
+    """
+    Handles async the notification submission. If the submission succeeds the request status is updated to 'sent'. 
+    In case of error the status is updated to 'failed'.
+
+    Args:
+        id: notification request's id
+    """
     with Session(db.engine) as session:
         notification = session.get(m.Notification, id)
         if not notification:
