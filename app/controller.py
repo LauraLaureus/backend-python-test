@@ -10,6 +10,13 @@ BASE_URL = "http://localhost:3001"
     retry=retry_if_exception_type((requests.RequestException,)),  # Solo errores de red
 )
 def call_provider(notification:CreateRequestBody, priority : ProviderPriority = "normal", trace_id: str = None):
+    """
+    Performs a call to the notificatio system. 
+
+    Args:
+        notification: a CreateRequestBody with the "message","to","type" keys. 
+
+    """
 
     ENDPOINT = f"{BASE_URL}/v1/notify"
 
